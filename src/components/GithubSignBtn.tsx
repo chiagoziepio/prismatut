@@ -1,6 +1,7 @@
 import { FaGithub } from "react-icons/fa";
 import { Button } from "./ui/button";
 import { signUpWithGithub } from "@/actions/action";
+
 const GithubSignBtn = () => {
   return (
     <form action={signUpWithGithub}>

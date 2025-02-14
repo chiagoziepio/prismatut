@@ -1,8 +1,15 @@
 import { signUpWithEmail } from "@/actions/action";
 import GithubSignBtn from "@/components/GithubSignBtn";
 import { Button } from "@/components/ui/button";
+import { auth } from "../../../../auth";
+import { redirect } from "next/navigation";
 
-export default function Login() {
+export default async function Login() {
+  const session = await auth();
+
+  if (session) {
+    redirect("/dashboard");
+  }
   return (
     <div className="w-[450px] mx-auto mt-20 bg-white rounded-[8px] p-7 h-fit border border-gray-200 shadow-md">
       <div className="mb-5">
