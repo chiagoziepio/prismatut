@@ -1,11 +1,10 @@
-import { signInWithEmail } from "@/actions/action";
+import { signUpWithEmail } from "@/actions/action";
 import GithubSignBtn from "@/components/GithubSignBtn";
 import { Button } from "@/components/ui/button";
 import { auth } from "../../../../auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 
-export default async function Login() {
+export default async function Register() {
   const session = await auth();
 
   if (session) {
@@ -15,7 +14,7 @@ export default async function Login() {
     <div className="w-[450px] mx-auto mt-20 bg-white rounded-[8px] p-7 h-fit border border-gray-200 shadow-md">
       <div className="mb-5">
         <h2 className="text-2xl font-bold text-center">
-          Sign in to your account
+          Sign up for an account
         </h2>
       </div>
       <GithubSignBtn />
@@ -28,10 +27,14 @@ export default async function Login() {
           <span className="w-[25%] border-t border-gray-300" />
         </div>
         <form
-          action={async (formData) => {
+          action={async (formData: FormData) => {
             "use server";
-
-            await signInWithEmail(formData);
+            const res = await signUpWithEmail(formData);
+            if (res.success) {
+              redirect("/login"); // ✅ Redirect on success
+            } else {
+              alert(res.error || "Issue occurred");
+            }
           }}
           className="mt-5 flex flex-col gap-2"
         >
@@ -59,11 +62,6 @@ export default async function Login() {
             sign in{" "}
           </Button>
         </form>
-      </div>
-      <div className="mt-4">
-        <p>
-          Dont have an account? <Link href={"/register"}>Register</Link>
-        </p>
       </div>
     </div>
   );
