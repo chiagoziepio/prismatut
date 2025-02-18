@@ -1,10 +1,10 @@
 import { redirectUser } from "@/lib/utils";
-import { auth } from "../../../../../auth";
+import { auth } from "../../../../auth";
 import Logout from "@/components/Logout";
 
 const Page = async () => {
   const session = await auth();
-  redirectUser(session, "/login");
+  //redirectUser(session, "/login");
   console.log(session);
 
   return (

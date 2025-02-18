@@ -2,17 +2,13 @@ import { db } from "@/lib/db/db";
 import { schema } from "@/lib/db/schema";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
-import { encode } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import { redirect } from "next/navigation";
-import { v4 as uuid } from "uuid";
-
-const adapter = PrismaAdapter(db);
+import bcrypt from "bcryptjs";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  //adapter,
+  adapter: PrismaAdapter(db),
   session: {
     strategy: "jwt",
   },
@@ -36,21 +32,28 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const user = await db.user.findFirst({
           where: {
             email: validateCredential.email,
-            password: validateCredential.password,
           },
         });
 
         //console.log("User:", user);
 
-        if (!user) {
-          throw new Error("Invalid credentials");
+        if (!user || !user.password || !user.email) {
+          return null;
+        }
+
+        const checkPwd = await bcrypt.compare(
+          validateCredential.password,
+          user.password
+        );
+        if (!checkPwd) {
+          return null;
         }
 
         return user;
       },
     }),
   ],
-  //adapter: PrismaAdapter(db),
+
   callbacks: {
     async jwt({ token, account }) {
       if (account?.provider === "credentials") {
@@ -59,25 +62,4 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return token;
     },
   },
-
-  //   jwt: {
-  //     encode: async function (params) {
-  //       if (params.token?.credentials) {
-  //         const sessionToken = uuid();
-  //         if (!params.token.sub) {
-  //           throw new Error("No sub");
-  //         }
-  //         const createdSession = await adapter?.createSession?.({
-  //           userId: params.token.sub,
-  //           expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-  //           sessionToken: sessionToken,
-  //         });
-  //         if (!createdSession) {
-  //           throw new Error("No session created");
-  //         }
-  //         return sessionToken;
-  //       }
-  //       return encode(params);
-  //     },
-  //   },
 });
