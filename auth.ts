@@ -11,6 +11,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
   session: {
     strategy: "jwt",
+    maxAge: 5 * 60 * 60,
   },
   providers: [
     GitHub,
@@ -55,11 +56,32 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   ],
 
   callbacks: {
-    async jwt({ token, account }) {
-      if (account?.provider === "credentials") {
-        token.crdentials = true;
+    // async jwt({ token, account }) {
+    //   if (account?.provider === "credentials") {
+    //     token.crdentials = true;
+    //   }
+    //   return token;
+    // },
+    async jwt({ token, user, account }) {
+      if (user && account) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        // Determine if the sign-in was via OAuth
+        token.isOauth = account.provider !== "credentials";
       }
+
       return token;
+    },
+    async session({ token, session }) {
+      //console.log("Token:", token);
+      //console.log("Session:", session);
+
+      if (session.user) {
+        session.user.isOauth = token.isOauth ?? false;
+        session.user.id = token.sub ?? "";
+      }
+      return session;
     },
   },
 });
