@@ -1,7 +1,5 @@
-"use client";
-
-import TokenVerification from "@/components/Auth/TokenVerification";
 import { Suspense } from "react";
+import TokenVerification from "@/components/Auth/TokenVerification";
 
 const Page = () => {
   return (
