@@ -1,10 +1,9 @@
+import { AvatarFallback } from "@radix-ui/react-avatar";
 import Link from "next/link";
-import React from "react";
-import { buttonVariants } from "./ui/button";
 import { auth } from "../../auth";
 import Logout from "./Logout";
 import { Avatar, AvatarImage } from "./ui/avatar";
-import { AvatarFallback } from "@radix-ui/react-avatar";
+import { buttonVariants } from "./ui/button";
 
 const NavBar = async () => {
   const session = await auth();
@@ -21,10 +20,13 @@ const NavBar = async () => {
         <ul className="list-none flex items-center gap-4 ">
           {session && (
             <Avatar className="bg-black flex items-center justify-center">
-              <AvatarImage src={session?.user?.image} />
-              <AvatarFallback className="text-white">
-                {session?.user?.email?.charAt(0).toLocaleUpperCase()}
-              </AvatarFallback>
+              {session?.user?.image ? (
+                <AvatarImage src={session.user.image} />
+              ) : (
+                <AvatarFallback className="text-white">
+                  {session?.user?.email?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              )}
             </Avatar>
           )}
           {!session && (
