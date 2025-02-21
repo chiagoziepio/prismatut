@@ -4,10 +4,18 @@ import { signUpWithEmail } from "@/actions/action";
 import GithubSignBtn from "@/components/GithubSignBtn";
 import FormFields from "../FormBtn";
 import { useState } from "react";
+import ErrorBox from "../ErrorBox";
+import SuccesBox from "../SuccesBox";
 import { redirect } from "next/navigation";
 
 export default function Register() {
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  if (error) {
+    setTimeout(() => {
+      setError("");
+    }, 3000);
+  }
   return (
     <div className="w-[450px] mx-auto mt-20 bg-white rounded-[8px] p-7 h-fit border border-gray-200 shadow-md">
       <div className="mb-5">
@@ -27,11 +35,17 @@ export default function Register() {
         <form
           action={async (formData: FormData) => {
             await signUpWithEmail(formData).then((res) => {
-              if (res.error) {
-                setError(res.error);
+              if (!res.success) {
+                console.log(res.message);
+                setError(res.message);
               }
               if (res.success) {
-                redirect("/login");
+                setSuccess(res.message);
+                console.log(res.message);
+                setTimeout(() => {
+                  setSuccess("");
+                  redirect("/login");
+                }, 5000);
               }
             });
           }}
@@ -39,7 +53,8 @@ export default function Register() {
         >
           <FormFields />
         </form>
-        {error && <p className="text-red-500">{error}</p>}
+        {error && <ErrorBox text={error} />}
+        {success && <SuccesBox text={success} />}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
+import { getUserById } from "@/lib/utils";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -22,7 +23,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         password: {},
       },
       authorize: async (credentials) => {
-        console.log("Credentials received:", credentials);
+        //console.log("Credentials received:", credentials);
 
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Missing email or password");
@@ -54,14 +55,34 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  pages: {
+    signIn: "/login",
+  },
+
+  events: {
+    async linkAccount({ user }) {
+      await db.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          emailVerified: new Date(),
+        },
+      });
+    },
+  },
 
   callbacks: {
-    // async jwt({ token, account }) {
-    //   if (account?.provider === "credentials") {
-    //     token.crdentials = true;
-    //   }
-    //   return token;
-    // },
+    async signIn({ user, account }) {
+      if (account?.provider === "credentials") {
+        const existingUser = await getUserById(user.id!);
+        // prevent sign in without email verified
+        if (!existingUser || !existingUser?.emailVerified) {
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (user && account) {
         token.id = user.id;
@@ -74,9 +95,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ token, session }) {
-      //console.log("Token:", token);
-      //console.log("Session:", session);
-
       if (session.user) {
         session.user.isOauth = token.isOauth ?? false;
         session.user.id = token.sub ?? "";

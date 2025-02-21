@@ -5,10 +5,22 @@ import GithubSignBtn from "@/components/GithubSignBtn";
 import Link from "next/link";
 import FormFields from "@/components/FormBtn";
 import { useState } from "react";
-import { redirect } from "next/navigation";
+import ErrorBox from "../ErrorBox";
+import { redirect, useSearchParams } from "next/navigation";
 
 export default function Login() {
   const [error, setError] = useState("");
+  const searchParams = useSearchParams();
+  const errorMessage =
+    searchParams.get("error") === "OAuthAccountNotLinked"
+      ? "Email is alreday in use"
+      : "";
+
+  if (error) {
+    setTimeout(() => {
+      setError("");
+    }, 5000);
+  }
 
   return (
     <div className="w-[450px] mx-auto mt-20 bg-white rounded-[8px] p-7 h-fit border border-gray-200 shadow-md">
@@ -31,8 +43,8 @@ export default function Login() {
             signInWithEmail(formData).then((res) => {
               if (res?.error) {
                 setError(res.error);
-              }
-              if (res?.success) {
+              } else {
+                setError("");
                 redirect("/dashboard");
               }
             });
@@ -42,7 +54,9 @@ export default function Login() {
           <FormFields />
         </form>
       </div>
-      {error && <p className="text-red-500">{error}</p>}
+
+      {error && <ErrorBox text={error || errorMessage} />}
+
       <div className="mt-4">
         <p>
           Dont have an account? <Link href={"/register"}>Register</Link>

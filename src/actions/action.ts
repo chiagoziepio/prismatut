@@ -5,10 +5,13 @@ import { signIn, signOut } from "../../auth";
 import { db } from "@/lib/db/db";
 import { AuthError } from "next-auth";
 import bcrypt from "bcryptjs";
+import { error } from "console";
+import { generateVerificationToken } from "@/lib/tokens";
+import { sendMail } from "@/lib/sendMail";
+import { getVerfictionTokenByToken } from "@/lib/utils";
 
 export const signUpWithGithub = async () => {
   await signIn("github", { redirectTo: "/dashboard" });
-  //console.log(signIn);
 };
 
 export const signInWithEmail = async (formData: FormData) => {
@@ -19,7 +22,7 @@ export const signInWithEmail = async (formData: FormData) => {
     if (!email || !password) {
       return { error: "Email and password are required" };
     }
-    console.log(formData);
+    // console.log(formData);
 
     const checkUser = await db.user.findFirst({
       where: {
@@ -28,6 +31,14 @@ export const signInWithEmail = async (formData: FormData) => {
     });
     if (!checkUser || !checkUser.password) {
       return { error: "User not found" };
+    }
+    if (!checkUser.emailVerified) {
+      const verificationToken = await generateVerificationToken(email);
+      if (!verificationToken) {
+        return { error: "Something went wrong" };
+      }
+      await sendMail(email, verificationToken.token);
+      return { error: "Please verify your email. Email sent" };
     }
     await signIn("credentials", {
       email: checkUser.email,
@@ -46,6 +57,7 @@ export const signInWithEmail = async (formData: FormData) => {
       }
     }
   }
+  throw error;
 };
 export const signUpWithEmail = async (formData: FormData) => {
   try {
@@ -63,7 +75,7 @@ export const signUpWithEmail = async (formData: FormData) => {
       },
     });
     if (isEmailExisting) {
-      return { success: false, error: "Email already exists" }; // ❌ Return error
+      return { success: false, message: "Email already exists" }; // ❌ Return error
     }
     const hasbhPwd = await bcrypt.hash(validateData.password, 10);
     const lowerCaseEmail = validateData.email.toLowerCase();
@@ -75,13 +87,52 @@ export const signUpWithEmail = async (formData: FormData) => {
       },
     });
 
-    return { success: true }; // ✅ Indicate success
+    const verificationToken = await generateVerificationToken(
+      validateData.email
+    );
+    if (!verificationToken) {
+      return { success: false, message: "Something went wrong" };
+    }
+    await sendMail(validateData.email, verificationToken.token);
+
+    return { success: true, message: "confirmation mail sent" }; // ✅ Indicate success
   } catch (error) {
     console.error("Signup error:", error);
-    return { success: false, error: "Signup failed" }; // ❌ Return error
+    return { success: false, message: "Signup failed" }; // ❌ Return error
   }
 };
 
 export const SignOutt = async () => {
   await signOut();
+};
+
+export const verifyToken = async (token: string) => {
+  try {
+    const verificationToken = await getVerfictionTokenByToken(token);
+
+    if (!verificationToken) {
+      return { success: false, message: "Invalid token" };
+    }
+    console.log({ verificationToken });
+    if (verificationToken.expires < new Date()) {
+      return { success: false, message: "Token expired" };
+    }
+    await db.user.update({
+      where: {
+        email: verificationToken.email,
+      },
+      data: {
+        emailVerified: new Date(),
+      },
+    });
+    await db.verificationToken.delete({
+      where: {
+        id: verificationToken.id,
+      },
+    });
+    return { success: true, message: "Email verified successfully" };
+  } catch (error) {
+    console.log(error);
+    return { success: false, message: "Unable to verify email" };
+  }
 };
