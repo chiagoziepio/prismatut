@@ -23,7 +23,7 @@ export default function Login() {
   }
 
   return (
-    <div className="w-[450px] mx-auto mt-20 bg-white rounded-[8px] p-7 h-fit border border-gray-200 shadow-md">
+    <div className="">
       <div className="mb-5">
         <h2 className="text-2xl font-bold text-center">
           Sign in to your account
