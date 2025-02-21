@@ -2,7 +2,7 @@ import GitHub from "next-auth/providers/github";
 
 import { db } from "@/lib/db/db";
 import { schema } from "@/lib/db/schema";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt-edge";
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
@@ -36,7 +36,7 @@ export default {
           return null;
         }
 
-        const checkPwd = await bcrypt.compare(
+        const checkPwd = bcrypt.compareSync(
           validateCredential.password,
           user.password
         );

@@ -5,7 +5,7 @@ import { schema } from "@/lib/db/schema";
 import { sendMail } from "@/lib/sendMail";
 import { generateVerificationToken } from "@/lib/tokens";
 import { getVerfictionTokenByToken } from "@/lib/utils";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt-edge";
 import { error } from "console";
 import { AuthError } from "next-auth";
 import { signIn, signOut } from "../../auth";
@@ -77,7 +77,7 @@ export const signUpWithEmail = async (formData: FormData) => {
     if (isEmailExisting) {
       return { success: false, message: "Email already exists" }; // ❌ Return error
     }
-    const hasbhPwd = await bcrypt.hash(validateData.password, 10);
+    const hasbhPwd = bcrypt.hashSync(validateData.password, 8);
     const lowerCaseEmail = validateData.email.toLowerCase();
     // Save to database
     await db.user.create({
