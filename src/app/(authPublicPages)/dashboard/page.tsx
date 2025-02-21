@@ -1,5 +1,5 @@
-import { auth } from "../../../../auth";
 import axios from "axios";
+import { auth } from "../../../../auth";
 
 const fetchUser = async (id: string | undefined) => {
   try {
@@ -22,7 +22,7 @@ const Page = async () => {
   if (session) {
     user = await fetchUser(session?.user?.id);
   }
-  //console.log(user);
+  console.log(user);
   console.log(session?.user?.isOauth);
 
   return (

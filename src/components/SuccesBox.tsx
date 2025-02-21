@@ -1,4 +1,3 @@
-import React from "react";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 const SuccesBox = ({ text }: { text: string }) => {
   return (

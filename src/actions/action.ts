@@ -1,14 +1,14 @@
 "use server";
 
-import { schema } from "@/lib/db/schema";
-import { signIn, signOut } from "../../auth";
 import { db } from "@/lib/db/db";
-import { AuthError } from "next-auth";
+import { schema } from "@/lib/db/schema";
+import { sendMail } from "@/lib/sendMail";
+import { generateVerificationToken } from "@/lib/tokens";
+import { getVerfictionTokenByToken } from "@/lib/utils";
 import bcrypt from "bcryptjs";
 import { error } from "console";
-import { generateVerificationToken } from "@/lib/tokens";
-import { sendMail } from "@/lib/sendMail";
-import { getVerfictionTokenByToken } from "@/lib/utils";
+import { AuthError } from "next-auth";
+import { signIn, signOut } from "../../auth";
 
 export const signUpWithGithub = async () => {
   await signIn("github", { redirectTo: "/dashboard" });

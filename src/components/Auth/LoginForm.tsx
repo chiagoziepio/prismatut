@@ -1,12 +1,12 @@
 "use client";
 
 import { signInWithEmail } from "@/actions/action";
+import FormFields from "@/components/FormBtn";
 import GithubSignBtn from "@/components/GithubSignBtn";
 import Link from "next/link";
-import FormFields from "@/components/FormBtn";
+import { redirect, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import ErrorBox from "../ErrorBox";
-import { redirect, useSearchParams } from "next/navigation";
 
 export default function Login() {
   const [error, setError] = useState("");

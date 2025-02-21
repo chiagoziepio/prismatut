@@ -1,8 +1,8 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { Button } from "./ui/button";
 import { RiLoader5Fill } from "react-icons/ri";
+import { Button } from "./ui/button";
 
 export default function FormFields() {
   const { pending } = useFormStatus();

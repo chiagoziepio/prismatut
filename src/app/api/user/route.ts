@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const user = await getUserById(userId);
-    // console.log(user);
+    console.log(user);
 
     return NextResponse.json({ message: "Hello World" }, { status: 200 });
   } catch (error) {

@@ -1,5 +1,4 @@
 import { SignOutt } from "@/actions/action";
-import React from "react";
 import { Button } from "./ui/button";
 
 const Logout = () => {
