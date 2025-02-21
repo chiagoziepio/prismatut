@@ -6,10 +6,13 @@ import SuccesBox from "@/components/SuccesBox";
 import { buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import React, { useEffect } from "react";
 
-const TokenVerification = ({ token }: { token: string }) => {
+const TokenVerification = () => {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
   const [isVerifying, setIsVerifying] = React.useState(false);
