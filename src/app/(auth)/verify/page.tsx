@@ -1,3 +1,5 @@
+"use client";
+
 import TokenVerification from "@/components/Auth/TokenVerification";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
